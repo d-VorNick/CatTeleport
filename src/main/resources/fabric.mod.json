@@ -20,6 +20,9 @@
   "entrypoints": {
     "main": [
       "net.dvornick.cattp.CatTeleport"
+    ],
+    "client": [
+      "net.dvornick.cattp.ClientCatTeleport"
     ]
   },
   "mixins": [

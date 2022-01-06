@@ -18,8 +18,8 @@ public class CatTeleport implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		ModCommandRegister.registerCommands();
-		ModEventsRegister.registerEvents();
+		//ModCommandRegister.registerCommands();
+		//ModEventsRegister.registerEvents();
 		LOGGER.info("Hello Fabric world!");
 	}
 }
