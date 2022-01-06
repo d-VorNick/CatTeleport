@@ -4,9 +4,11 @@
   "package": "net.dvornick.cattp.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+
   ],
   "client": [
-    "ExampleMixin"
+    "ExampleMixin",
+    "ModEntityDataSaver"
   ],
   "injectors": {
     "defaultRequire": 1
