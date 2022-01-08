@@ -12,10 +12,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.dvornick.cattp.util.IEntityDataSaver;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 public class AddTeleportPointCommand {
@@ -24,7 +22,7 @@ public class AddTeleportPointCommand {
     public static final String POINTS_STORAGE = "TeleportPointsStorage";
     public static final String INITED = "TeleportPlayerInformation";
     //public static final String DATA = "..\\playerdata\\playerdata.txt";
-    public static final String DATA = "playerdata.txt";
+    public static final String DATA = "C:\\Users\\vniki\\Documents\\MinecraftModding\\CatTeleport\\run\\playerdata.txt";
 
     public static void register() {
         ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("add-point")
@@ -63,38 +61,38 @@ public class AddTeleportPointCommand {
                 return -1;
             }
 
-
             player.getPersistentData().putIntArray(POINT_KEY + name, time);
-            FileReader reader = new FileReader(DATA);
-            BufferedReader buffReader = new BufferedReader(reader);
-            FileWriter writer = new FileWriter(DATA, false);
+
+            FileInputStream fileInputStream = new FileInputStream(DATA);
+
+
             if (!player.getPersistentData().contains(POINTS_STORAGE)) {
                 player.getPersistentData().putString(POINTS_STORAGE, "&" + name + "&");
-
-                writer.write(" " + name + " " + from + " " + to + " ");
-
+                FileOutputStream fileOutputStream = new FileOutputStream(DATA);
+                fileOutputStream.write((" " + name + " " + from + " " + to + " ").getBytes());
+                fileOutputStream.close();
             } else {
                 String points = player.getPersistentData().getString(POINTS_STORAGE);
 
                 points = points + name + "&";
                 player.getPersistentData().putString(POINTS_STORAGE, points);
 
-                String fstr = "";
+                StringBuilder fstr = new StringBuilder();
 
-                fstr = buffReader.readLine();
-
-                if (fstr == null) {
-                    fstr = "";
+                int c;
+                while((c=fileInputStream.read())!= -1){
+                    fstr.append((char) c);
                 }
-                context.getSource().sendFeedback(new LiteralText(fstr));
-                fstr = fstr + name + " " + from + " " + to + " ";
+                fileInputStream.close();
 
-                writer.write(fstr);
+
+                context.getSource().sendFeedback(new LiteralText(fstr.toString() + "addads"));
+                fstr.append(name).append(" ").append(from).append(" ").append(to).append(" ");
+                FileOutputStream fileOutputStream = new FileOutputStream(DATA);
+                fileOutputStream.write(fstr.toString().getBytes());
+                fileOutputStream.close();
             }
-            writer.flush();
-            writer.close();
-            reader.close();
-            buffReader.close();
+
             context.getSource().sendFeedback(new LiteralText("Set point " + name + " with timings from " + from + " to " + to));
             return 1;
 

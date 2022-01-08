@@ -21,19 +21,22 @@ public class InitCatTeleport {
             File file = new File(DATA);
             file.createNewFile();
 
-            Reader reader = new FileReader(file);
-            BufferedReader buffReader = new BufferedReader(reader);
-
-            //FileInputStream fileInputStream = new FileInputStream(DATA);
+            FileInputStream fileInputStream = new FileInputStream(DATA);
 
 
             StringBuilder fpoints = new StringBuilder();
             fpoints.append("&");
-            String data = "";
-            data = buffReader.readLine();
-            context.getSource().sendFeedback(new LiteralText(data + "pzzzz"));
-            if (data != null) {
-                String[] splitData = data.split(" ");
+            StringBuilder data = new StringBuilder();
+
+            int c;
+
+            while((c=fileInputStream.read())!= -1){
+                data.append((char) c);
+            }
+            fileInputStream.close();
+            context.getSource().sendFeedback(new LiteralText(data.toString() + "pzzzz"));
+            if (!data.toString().equals("")) {
+                String[] splitData = data.toString().split(" ");
                 for (int i = 1; i < (splitData.length - 1) / 3 + 1; i++) {
                     String fname = splitData[(i - 1) * 3 + 1];
                     int ffrom = Integer.parseInt(splitData[(i - 1) * 3 + 2]);
@@ -45,8 +48,7 @@ public class InitCatTeleport {
                 }
             }
             player.getPersistentData().putBoolean(INITED, true);
-            reader.close();
-            buffReader.close();
+
         } catch (IOException e) {
             context.getSource().sendFeedback(new LiteralText("IOException"));
         }
