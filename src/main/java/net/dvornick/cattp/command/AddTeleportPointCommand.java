@@ -3,15 +3,28 @@ package net.dvornick.cattp.command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.dvornick.cattp.events.InitCatTeleport;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.dvornick.cattp.util.IEntityDataSaver;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class AddTeleportPointCommand {
 
     public static final String POINT_KEY = "pointPos_";
+    public static final String POINTS_STORAGE = "TeleportPointsStorage";
+    public static final String INITED = "TeleportPlayerInformation";
+    //public static final String DATA = "..\\playerdata\\playerdata.txt";
+    public static final String DATA = "playerdata.txt";
 
     public static void register() {
         ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("add-point")
@@ -21,19 +34,74 @@ public class AddTeleportPointCommand {
     }
 
     private static int run(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
-        IEntityDataSaver player = (IEntityDataSaver) context.getSource().getPlayer();
-        String name = context.getArgument("name", String.class);
-        Integer from = context.getArgument("from", Integer.class);
-        Integer to = context.getArgument("to", Integer.class);
-        int[] time = {from, to};
-        if (player.getPersistentData().contains(POINT_KEY + name)) {
-            context.getSource().sendFeedback(new LiteralText("Point " + name + " already exists. \n" +
-                    "Use a different name or command /update to change the timings"));
+        try {
+            IEntityDataSaver player = (IEntityDataSaver) context.getSource().getPlayer();
+            String name = context.getArgument("name", String.class);
+            Integer from = context.getArgument("from", Integer.class);
+            Integer to = context.getArgument("to", Integer.class);
+
+
+            if (!player.getPersistentData().contains(INITED)) {
+                InitCatTeleport.initialize(player, context);
+            }
+
+
+            if (name.length() > 20) {
+                context.getSource().sendFeedback(new LiteralText("Name must contain less than 20 characters"));
+                return -1;
+            }
+
+            if (name.contains("&")) {
+                context.getSource().sendFeedback(new LiteralText("Remove ampersand from name"));
+                return -1;
+            }
+
+            int[] time = {from, to};
+            if (player.getPersistentData().contains(POINT_KEY + name)) {
+                context.getSource().sendFeedback(new LiteralText("Point " + name + " already exists. \n" +
+                        "Use a different name or command /update to change the timings"));
+                return -1;
+            }
+
+
+            player.getPersistentData().putIntArray(POINT_KEY + name, time);
+            FileReader reader = new FileReader(DATA);
+            BufferedReader buffReader = new BufferedReader(reader);
+            FileWriter writer = new FileWriter(DATA, false);
+            if (!player.getPersistentData().contains(POINTS_STORAGE)) {
+                player.getPersistentData().putString(POINTS_STORAGE, "&" + name + "&");
+
+                writer.write(" " + name + " " + from + " " + to + " ");
+
+            } else {
+                String points = player.getPersistentData().getString(POINTS_STORAGE);
+
+                points = points + name + "&";
+                player.getPersistentData().putString(POINTS_STORAGE, points);
+
+                String fstr = "";
+
+                fstr = buffReader.readLine();
+
+                if (fstr == null) {
+                    fstr = "";
+                }
+                context.getSource().sendFeedback(new LiteralText(fstr));
+                fstr = fstr + name + " " + from + " " + to + " ";
+
+                writer.write(fstr);
+            }
+            writer.flush();
+            writer.close();
+            reader.close();
+            buffReader.close();
+            context.getSource().sendFeedback(new LiteralText("Set point " + name + " with timings from " + from + " to " + to));
+            return 1;
+
+        } catch (IOException e) {
+            context.getSource().sendFeedback(new LiteralText("IOException"));
             return -1;
         }
-        player.getPersistentData().putIntArray(POINT_KEY + name, time);
-        context.getSource().sendFeedback(new LiteralText("Set point " + name + " with timings from " + from + " to " + to));
-        return 1;
     }
 
 
