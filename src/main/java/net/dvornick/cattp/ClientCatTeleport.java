@@ -1,4 +1,5 @@
 package net.dvornick.cattp;
+import net.dvornick.cattp.events.InitCatTeleport;
 import net.dvornick.cattp.util.ModCommandRegister;
 import net.dvornick.cattp.util.ModEventsRegister;
 import net.fabricmc.api.ClientModInitializer;

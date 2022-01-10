@@ -13,7 +13,7 @@ public class InitCatTeleport {
     public static final String POINTS_STORAGE = "TeleportPointsStorage";
     public static final String INITED = "TeleportPlayerInformation";
     //public static final String DATA = "..\\playerdata\\playerdata.txt";
-    public static final String DATA = "playerdata.txt";
+    public static final String DATA = "mods\\playerdata.txt";
 
 
     public static void initialize(IEntityDataSaver player, CommandContext<FabricClientCommandSource> context) {
@@ -34,7 +34,7 @@ public class InitCatTeleport {
                 data.append((char) c);
             }
             fileInputStream.close();
-            context.getSource().sendFeedback(new LiteralText(data.toString() + "pzzzz"));
+
             if (!data.toString().equals("")) {
                 String[] splitData = data.toString().split(" ");
                 for (int i = 1; i < (splitData.length - 1) / 3 + 1; i++) {

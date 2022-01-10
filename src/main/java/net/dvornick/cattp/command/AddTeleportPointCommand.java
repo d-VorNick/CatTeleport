@@ -11,6 +11,8 @@ import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
 import net.dvornick.cattp.util.IEntityDataSaver;
+import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +24,7 @@ public class AddTeleportPointCommand {
     public static final String POINTS_STORAGE = "TeleportPointsStorage";
     public static final String INITED = "TeleportPlayerInformation";
     //public static final String DATA = "..\\playerdata\\playerdata.txt";
-    public static final String DATA = "C:\\Users\\vniki\\Documents\\MinecraftModding\\CatTeleport\\run\\playerdata.txt";
+    public static final String DATA = "mods\\playerdata.txt";
 
     public static void register() {
         ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("add-point")
@@ -43,21 +45,24 @@ public class AddTeleportPointCommand {
                 InitCatTeleport.initialize(player, context);
             }
 
+            Style style = new LiteralText(name).getStyle();
+            Style gold = style.withColor(Formatting.GOLD);
+            Style red = style.withColor(Formatting.RED);
 
             if (name.length() > 20) {
-                context.getSource().sendFeedback(new LiteralText("Name must contain less than 20 characters"));
+                context.getSource().sendFeedback(new LiteralText("Name must contain less than 20 characters").setStyle(red));
                 return -1;
             }
 
             if (name.contains("&")) {
-                context.getSource().sendFeedback(new LiteralText("Remove ampersand from name"));
+                context.getSource().sendFeedback(new LiteralText("Remove ampersand from name").setStyle(red));
                 return -1;
             }
 
             int[] time = {from, to};
             if (player.getPersistentData().contains(POINT_KEY + name)) {
                 context.getSource().sendFeedback(new LiteralText("Point " + name + " already exists. \n" +
-                        "Use a different name or command /update to change the timings"));
+                        "Use a different name or command /update to change the timings").setStyle(red));
                 return -1;
             }
 
@@ -85,15 +90,13 @@ public class AddTeleportPointCommand {
                 }
                 fileInputStream.close();
 
-
-                context.getSource().sendFeedback(new LiteralText(fstr.toString() + "addads"));
                 fstr.append(name).append(" ").append(from).append(" ").append(to).append(" ");
                 FileOutputStream fileOutputStream = new FileOutputStream(DATA);
                 fileOutputStream.write(fstr.toString().getBytes());
                 fileOutputStream.close();
             }
 
-            context.getSource().sendFeedback(new LiteralText("Set point " + name + " with timings from " + from + " to " + to));
+            context.getSource().sendFeedback(new LiteralText("Set point " + name + " with timings from " + from + " to " + to).setStyle(gold));
             return 1;
 
         } catch (IOException e) {

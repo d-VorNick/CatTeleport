@@ -7,6 +7,9 @@ import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.LiteralText;
 import net.dvornick.cattp.util.IEntityDataSaver;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 
 public class ShowAllPointsCommand {
 
@@ -24,8 +27,14 @@ public class ShowAllPointsCommand {
         if (!player.getPersistentData().contains(INITED)) {
             InitCatTeleport.initialize(player, context);
         }
+
+        Style style = new LiteralText("answer").getStyle();
+        Style gold = style.withColor(Formatting.GOLD);
+        Style red = style.withColor(Formatting.RED);
+
+
         if (!player.getPersistentData().contains(POINTS_STORAGE)) {
-            context.getSource().sendFeedback(new LiteralText("You don't have any teleport points"));
+            context.getSource().sendFeedback(new LiteralText("You don't have any teleport points").setStyle(red));
             return 1;
         }
 
@@ -33,17 +42,19 @@ public class ShowAllPointsCommand {
         String[] allPoints = points.split("&");
         int countPoints = allPoints.length - 1;
         if (countPoints < 1) {
-            context.getSource().sendFeedback(new LiteralText("You don't have any teleport points"));
+            context.getSource().sendFeedback(new LiteralText("You don't have any teleport points").setStyle(red));
             return 1;
         }
 
-        StringBuilder answer = new StringBuilder("You have " + (allPoints.length - 1) + " teleport points:\n");
+        StringBuilder answer = new StringBuilder( "You have " + (allPoints.length - 1) + " teleport points:\n");
 
         for (int i = 1; i < allPoints.length; i ++) {
             int[] point = player.getPersistentData().getIntArray(POINT_KEY + allPoints[i]);
             answer.append(allPoints[i]).append(" with timings from ").append(point[0]).append(" to ").append(point[1]).append("\n");
         }
-        context.getSource().sendFeedback(new LiteralText(answer.toString()));
+
+         //= new Style(TextColor.fromFormatting(Formatting.GOLD), true, false, false, false, false, null, null, null, "test");
+        context.getSource().sendFeedback(new LiteralText(answer.toString()).setStyle(gold));
         return 1;
     }
 
